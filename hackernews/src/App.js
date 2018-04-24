@@ -4,7 +4,7 @@ import './App.css';
 
 const list = [
   {
-    title: 'React',
+    title: 'Aardvark',
     url:'https://facebook.github.io/react/',
     author: 'Person One',
     num_comments: 1,
@@ -12,7 +12,7 @@ const list = [
     objectID: 0,
   },
   {
-    title: 'Redux',
+    title: 'Bumble Bee',
     url:'https://github.com/reactjs/redux',
     author: 'Person Two',
     num_comments: 2,
@@ -20,7 +20,7 @@ const list = [
     objectID: 1,
   },
   {
-    title: 'React',
+    title: 'Chinchilla',
     url:'https://facebook.github.io/react/',
     author: 'Person Three',
     num_comments: 3,
@@ -28,7 +28,7 @@ const list = [
     objectID: 2,
   },
   {
-    title: 'Redux',
+    title: 'Dolphin',
     url:'https://github.com/reactjs/redux',
     author: 'Person Four',
     num_comments: 4,
@@ -77,13 +77,15 @@ class App extends Component {
 
     return (
 
-      <div className="App">
-        <Search
-          value={searchTerm}
-          onChange={this.onSearchChange}
-        >
-          Search
-        </Search>
+      <div className="page">
+        <div className="interactions">
+          <Search
+            value={searchTerm}
+            onChange={this.onSearchChange}
+          >
+            Search
+          </Search>
+        </div>
         <Table
           list={list}
           pattern={searchTerm}
@@ -107,21 +109,26 @@ const Search = ({value, onChange, children}) =>
   </form>
 
 const Table = ({list, pattern, onDismiss}) => 
-  <div>
+  <div className="table">
     {list.filter(isSearched(pattern)).map(item =>
-      <div key={item.objectID}>
-        <span>
+      <div key={item.objectID} className="table-row">
+        <span style={{ width: '40%' }}>
           <a href={item.url}>{item.title}</a>
         </span>
-        <span> </span>
-        <span>{item.author}</span>
-        <span> </span>
-        <span>{item.num_comments}</span>
-        <span> </span>
-        <span>{item.points}</span>
-        <span> </span>
+        <span style={{ width: '30%' }}>
+          {item.author}
+        </span>
+        <span style={{ width: '10%' }}>
+          {item.num_comments}
+        </span>
+        <span style={{ width: '10%' }}>
+          {item.points}
+        </span>
         <span>
-          <Button onClick={() => onDismiss(item.objectID)}>
+          <Button
+            onClick={() => onDismiss(item.objectID)}
+            className="button-inline"
+          >
             Dismiss
           </Button>
         </span>
