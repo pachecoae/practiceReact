@@ -72,7 +72,7 @@ class App extends Component {
 
     const {
       searchTerm,
-      list
+      list,
     } = this.state;
 
     return (
@@ -104,7 +104,7 @@ class Search extends Component {
     const {
       value,
       onChange,
-      children
+      children,
     } = this.props;
 
     return (
@@ -128,7 +128,7 @@ class Table extends Component {
     const {
       list,
       pattern,
-      onDismiss
+      onDismiss,
     } = this.props;  
 
     return (
@@ -146,16 +146,39 @@ class Table extends Component {
             <span>{item.points}</span>
             <span> </span>
             <span>
-              <button
-                onClick={() => onDismiss(item.objectID)}
-                type="button"
-              >
+              <Button onClick={() => onDismiss(item.objectID)}>
                 Dismiss
-              </button>
+              </Button>
             </span>
           </div>
         )}
       </div>
+    );
+
+  }
+
+}
+
+class Button extends Component {
+
+  render() {
+
+    const {
+      onClick,
+      className = '',
+      children,
+    } = this.props;
+    
+    return (
+
+      <button
+        onClick={onClick}
+        className={className}
+        type="button"
+      >
+        {children}
+      </button>
+
     );
 
   }
