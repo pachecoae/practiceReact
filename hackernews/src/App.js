@@ -1,45 +1,13 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
 import './App.css';
 
-const list = [
-  {
-    title: 'Aardvark',
-    url:'https://facebook.github.io/react/',
-    author: 'Person One',
-    num_comments: 1,
-    points: 1,
-    objectID: 0,
-  },
-  {
-    title: 'Bumble Bee',
-    url:'https://github.com/reactjs/redux',
-    author: 'Person Two',
-    num_comments: 2,
-    points: 2,
-    objectID: 1,
-  },
-  {
-    title: 'Chinchilla',
-    url:'https://facebook.github.io/react/',
-    author: 'Person Three',
-    num_comments: 3,
-    points: 3,
-    objectID: 2,
-  },
-  {
-    title: 'Dolphin',
-    url:'https://github.com/reactjs/redux',
-    author: 'Person Four',
-    num_comments: 4,
-    points: 4,
-    objectID: 3,
-  },
-]
+const DEFAULT_QUERY = 'redux';
 
-const isSearched = searchTerm => item =>
-  item.title.toLowerCase().includes(searchTerm.toLowerCase());
+const PATH_BASE = 'https://hn.algolia.com/api/v1';
+const PATH_SEARCH = '/search';
+const PARAM_SEARCH = 'query=';
 
+// Representation as a function instead of a constant:
 // function isSearched(searchTerm) {
 //   return function(item) {
 //     return item.title.toLowerCase().includes(searchTerm.toLowerCase());
@@ -49,31 +17,64 @@ const isSearched = searchTerm => item =>
 class App extends Component {
 
   constructor(props) {
+
     super(props);
 
     this.state = {
-      list,
-      searchTerm: '',
-    }
+      result: null,
+      searchTerm: DEFAULT_QUERY,
+    };
 
+    this.setSearchTopStories = this.setSearchTopStories.bind(this);
+    this.fetchSearchTopStories = this.fetchSearchTopStories.bind(this);
+    this.onSearchChange = this.onSearchChange.bind(this);
+
+  }
+
+  setSearchTopStories(result) {
+    this.setState({ result });
+  }
+  
+  fetchSearchTopStories(searchTerm) {
+    fetch(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}`)
+      .then(response => response.json())
+      .then(result => this.setSearchTopStories(result))
+      .catch(e => e);
+  }
+
+  componentDidMount() {
+    const { searchTerm } = this.state;
+    this.fetchSearchTopStories(searchTerm);
   }
 
   onDismiss = (id) => {
     const isNotId = item => item.objectID !== id;
-    const updatedList = this.state.list.filter(isNotId);
-    this.setState({ list: updatedList })
+    const updatedHits = this.state.result.hits.filter(isNotId);
+    this.setState({
+      result: { ...this.state.result, hits: updatedHits }
+    });
   }
 
   onSearchChange = (event) => {
     this.setState({ searchTerm: event.target.value })
   }
 
+  onSearchSubmit = (event) => {
+    const { searchTerm } = this.state;
+    this.fetchSearchTopStories(searchTerm);
+    event.preventDefault();
+  }
+
   render() {
 
     const {
       searchTerm,
-      list,
+      result,
     } = this.state;
+
+    if (!result) { 
+      return null;
+    }
 
     return (
 
@@ -82,15 +83,17 @@ class App extends Component {
           <Search
             value={searchTerm}
             onChange={this.onSearchChange}
+            onSubmit={this.onSearchSubmit}
           >
             Search
           </Search>
         </div>
-        <Table
-          list={list}
-          pattern={searchTerm}
-          onDismiss={this.onDismiss}
-        />
+        { result
+          && <Table
+            list={result.hits}
+            onDismiss={this.onDismiss}
+          />
+        }
       </div>
 
     );
@@ -99,18 +102,26 @@ class App extends Component {
 
 }
 
-const Search = ({value, onChange, children}) =>
-  <form>
+const Search = ({
+  value,
+  onChange,
+  onSubmit,
+  children
+}) =>
+  <form onSubmit={onSubmit}>
     {children} <input
       type="text"
       value={value}
       onChange={onChange}
     />
+    <button type="submit">
+      {children}
+    </button>
   </form>
 
-const Table = ({list, pattern, onDismiss}) => 
+const Table = ({list, onDismiss}) => 
   <div className="table">
-    {list.filter(isSearched(pattern)).map(item =>
+    {list.map(item =>
       <div key={item.objectID} className="table-row">
         <span style={{ width: '40%' }}>
           <a href={item.url}>{item.title}</a>
